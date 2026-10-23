@@ -1,31 +1,48 @@
-Project Overview:
+## Project Overview:
 
 This project focuses on analyzing customer purchasing behavior for an e-commerce platform using Unsupervised Machine Learning. By leveraging the RFM (Recency, Frequency, Monetary) framework, I segmented over 500,000 transactions into distinct groups. This allows businesses to implement targeted marketing strategies, improve customer retention, and maximize revenue.
 
-Key Features & Workflow
-1.	Data Cleaning: Handled missing values and removed canceled orders.
-2.	Feature Engineering (RFM): Transformed raw transactional data into three behavioral metrics:
-   -	Recency: Days since the last purchase.
-   -	Frequency: Total number of purchases.
-   -	Monetary: Total amount spent.
 
-3.	Data Scaling: Applied StandardScaler to normalize features for optimal clustering performance.
-4.	Optimal K Selection: Used the Elbow Method and Silhouette Analysis to determine the best number of clusters.
-5.	Customer Clustering: Implemented K-Means Clustering to categorize customers into 4 strategic segments.
-6.	Advanced Visualization:Used t-SNE and PCA for dimensionality reduction to visualize high-dimensional clusters in a 2D space.
- 	
-Results & Business Insights
+## Data and cleaning
+- Both sheets of the Excel file are combined (they overlap in December 2010, so exact duplicates are removed).
+- Removed: rows without Customer ID, cancelled invoices, non-positive quantity or price, and non-product codes (postage, fees, manual adjustments).
+- **5,852 customers** analysed.
 
-The model achieved a Silhouette Score of 0.6, indicating good cluster separation and consistency.
-Customer Personas:
+## Method
+1. **RFM features** per customer: Recency (days since last purchase), Frequency (number of invoices), Monetary (total spend).
+2. **log1p transform + StandardScaler.** RFM data is heavily right-skewed, and without the log transform K-Means spends clusters on a few extreme customers.
+3. **Choosing k:** compared k = 2–10 using elbow, silhouette and Davies-Bouldin, restricted to k = 3–6 with no cluster under 3% of customers. Result: **k = 4**.
+4. **K-Means** (`n_init=10`, `random_state=42`) and segment profiling using medians.
+5. **PCA** to visualise the segments in 2D.
 
-- Champions (Cluster 2): High-value, frequent shoppers who purchased recently.
-- Loyalists (Cluster 3): Consistent customers with high spending and steady engagement.
-- Potential Loyalists (Cluster 0): Moderate shoppers who visit every 1-2 months; prime targets for upselling.
-- At-Risk (Cluster 1): Inactive customers (8+ months since last purchase) who require urgent re-engagement.
-  
-Tech Stack
-- Language: Python
-- Libraries: Pandas, NumPy, Scikit-learn, Matplotlib, Seaborn.
-- Algorithms: K-Means Clustering, t-SNE, PCA.
-- Environment: Google Colab / Jupyter Notebook.
+## Results
+
+| Segment | Customers | % customers | Median recency (days) | Median orders | Median spend | % revenue |
+|---|---|---|---|---|---|---|
+| Champions | 1,110 | 19.0 | 15 | 13 | 5,117.7 | 71.6 |
+| At Risk | 1,468 | 25.1 | 157 | 5 | 1,580.4 | 18.5 |
+| Potential Loyalists | 1,220 | 20.8 | 23 | 3 | 707.7 | 5.9 |
+| Hibernating / Lost | 2,054 | 35.1 | 398 | 1 | 291.4 | 4.1 |
+
+**Key finding:** Champions are 19% of customers but generate about 72% of revenue, while the 35% who are Hibernating / Lost generate about 4%.
+
+**Suggested actions:**
+- Champions: reward and retain (early access, loyalty perks), avoid heavy discounting.
+- At Risk: re-engagement campaign with a time-limited offer.
+- Potential Loyalists: encourage repeat orders (reminders, tiered offers).
+- Hibernating / Lost: low-cost email reactivation only.
+
+## Validation
+- Silhouette score: **0.365**
+- Davies-Bouldin index: **0.940**
+
+These scores indicate moderate separation. The PCA plot shows the customers as one continuous cloud divided into four regions, which is typical for RFM data. The segments are **practical groups for marketing, not naturally separated clusters.**
+
+
+
+## Tech stack
+Python, pandas, NumPy, scikit-learn, Matplotlib, Seaborn. Runs in Google Colab or Jupyter.
+
+## How to run
+1. Download `online_retail_II.xlsx` (UCI Online Retail II) and upload it to Colab, or edit `file_path` in the notebook.
+2. Run all cells.
